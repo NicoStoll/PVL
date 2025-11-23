@@ -1,0 +1,72 @@
+services:
+  # -------------------------------------------------------
+  # Log-producing Container
+  # -------------------------------------------------------
+  auth-service:
+    image: sagarnikam123/fuzzy-train:latest
+    command: >
+      --lines-per-second 1
+      --min-log-length 120
+      --max-log-length 180
+      --log-format JSON
+      --output file
+      --file /logs/auth-service.log
+      --trace-id-type integer
+    volumes:
+      - ./logs:/logs
+    container_name: auth-logs
+
+  # -------------------------------------------------------
+  # Vector Log Collector
+  # -------------------------------------------------------
+  vector:
+    image: timberio/vector:0.51.1-debian
+    container_name: vector
+    volumes:
+      - ./vector/vector.yaml:/etc/vector/vector.yaml:ro
+      - ./logs:/logs
+    ports:
+      - "8686:8686"      # Vector API
+    depends_on:
+      - auth-service
+      - victoria-logs
+    networks:
+      - logging-net
+
+
+  # -------------------------------------------------------
+  # Victoria Logs
+  # -------------------------------------------------------
+  victoria-logs:
+    image: victoriametrics/victoria-logs:v1.38.0
+    container_name: victoria-logs
+    command:
+      - "--httpListenAddr=:9428"
+    volumes:
+      - ./victoria-logs-data:/victoria-data
+    networks:
+      - logging-net
+
+  # -------------------------------------------------------
+  # Grafana
+  # -------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - logging-net
+    depends_on:
+      - victoria-logs
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+
+
+  # -------------------------------------------------------
+  # Network
+  # -------------------------------------------------------
+networks:
+  logging-net:
+    driver: bridge
