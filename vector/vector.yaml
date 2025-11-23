@@ -1,0 +1,39 @@
+sources:
+  auth_logs:
+    type: file
+    include:
+      - /logs/auth-service.log
+    read_from: beginning
+    ignore_older: 0
+
+transforms:
+  parse_json:
+    type: remap
+    inputs:
+      - auth_logs
+    source: |
+      # parse message als JSON-Objekt
+      . = parse_json!(.message)
+      # keine Arrays, jede Zeile ist ein Event
+
+sinks:
+  vlogs:
+    inputs:
+      - parse_json
+    type: http
+    uri: http://victoria-logs:9428/insert/jsonline?_stream_fields=host,container_name&_msg_field=message&_time_field=timestamp
+    compression: gzip
+    encoding:
+      codec: json
+    framing:
+      method: newline_delimited
+    healthcheck:
+      enabled: true
+
+  debug_file:
+    type: file
+    inputs:
+      - parse_json
+    path: /logs/vector-output.ndjson
+    encoding:
+      codec: json
