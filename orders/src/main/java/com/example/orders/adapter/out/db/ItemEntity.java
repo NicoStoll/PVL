@@ -15,6 +15,10 @@ import lombok.NoArgsConstructor;
 @Data
 public class ItemEntity {
 
+    public ItemEntity(String name) {
+        this.name = name;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
