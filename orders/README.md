@@ -1,4 +1,4 @@
-# My Application
+# Orders Application
 
 This project is a Spring Boot application following Clean Architecture principles, packaged and run using Docker. 
 Below is documentation covering build instructions, API access, metrics/health endpoints, and a short explanation of the architectural approach.

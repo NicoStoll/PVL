@@ -8,6 +8,13 @@ Vector — log collector, transformer, and shipper
 
 Grafana — visualization and querying
 
+
+## Run the project 
+
+```sh
+docker compose up
+```
+
 ## The system:
 
 mocks multiple services writing logs (some to file, some to stdout),
@@ -21,14 +28,16 @@ visualizes logs in Grafana using the VictoriaLogs datasource plugin,
 uses only open-source components (matches Open Cloud Initiative goals).
 
 ## Architecture Overview
-+-------------+       +-----------+        +----------------+
-| mock-service| ----> |           | -----> |                |
-| mock-2      | ----> |  Vector   | -----> |  VictoriaLogs  |
-| mock-3      | ----> |           | -----> |                |
-+-------------+       +-----------+        +----------------+
-                                      \
-                                       \--> Grafana (Explore/ dashboards)
+
+![Architecture](./architecture.png)
 
 Vector tails files, reads stdout, adds metadata, batches, and sends logs to VictoriaLogs using its HTTP ingestion API.
 
 Grafana queries VictoriaLogs using the official datasource plugin.
+
+
+## Order Service Documentation
+
+Documentation includes the OpenAPI definition as well as the services architecture description.
+
+[Link to Documentation](./orders/README.md)
